@@ -1,9 +1,23 @@
-#include <QCoreApplication>
+#include <boost/filesystem/operations.hpp>
+
+#include <boost/filesystem/path.hpp>
+
 #include <iostream>
-int main(int argc, char *argv[])
+
+namespace fs = boost::filesystem;
+
+
+int main(int argc,char** argv)
 {
-    QCoreApplication a(argc, argv);
-    std::cout << "lol" << std::endl;
-    exit(1);
-    return a.exec();
+    fs::path full_path( fs::initial_path<fs::path>() );
+
+    full_path = fs::system_complete( fs::path( argv[0] ) );
+
+    std::cout << full_path << std::endl;
+
+    //Without file name
+    std::cout << full_path.stem() << std::endl;
+    //std::cout << fs::basename(full_path) << std::endl;
+
+    return 0;
 }
