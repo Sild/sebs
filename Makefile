@@ -15,4 +15,4 @@ scrambler.o: $(HEADER)/scrambler.h $(SOURCE)/scrambler.cpp
 md5.o: $(HEADER)/md5.h $(SOURCE)/md5.cpp
 	g++ -c $(SOURCE)/md5.cpp
 clean:
-	rm ./*.o
+	rm ./*.o ./output/* ./clone/*

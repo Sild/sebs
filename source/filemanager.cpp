@@ -8,8 +8,9 @@ boost::filesystem::path get_app_path() {
 }
 
 bool merge(string ifpath, string ofpath) {
+	std::cout << "++++++++++++++" << std::endl;
 	char *buffer;
-	int len = 2048;
+	int len = 20480;
 	buffer = new char[len];
 	int maxstrlen = 100;
 	std::ifstream segment_list(ifpath.c_str());
@@ -19,11 +20,19 @@ bool merge(string ifpath, string ofpath) {
 
 	while(segment_list) {
 		std::getline(segment_list, segment_name);
+		std::cout << segment_name << std::endl;
 		ifstream ifile(segment_name.c_str(), ios::in | ios::binary);
 		do {
 
 			ifile.read(buffer, len);
 			if(ifile.gcount()) {
+
+				// std::cout << buffer << std::endl;
+    		std::cout << decode(buffer, len) << std::endl;
+    		// std::cout << decode(encode(buffer, len), len) << std::endl;
+    		// return false;
+    		std::cout << "-----------------" << std::endl;
+
 				ofile.write( decode(buffer, len), ifile.gcount());
 			}
 		} while (ifile.gcount());
@@ -36,7 +45,7 @@ bool merge(string ifpath, string ofpath) {
 
 bool segmentate(string ifpath, string ofpath) {
 	char * buffer;
-    int len = 2048; //Выбираем размер буфера, какой нравится
+    int len = 20480; //Выбираем размер буфера, какой нравится
  
     ifstream infile(ifpath.c_str(), ios::in | ios::binary);
 
@@ -58,11 +67,17 @@ bool segmentate(string ifpath, string ofpath) {
         		cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
         		return false;
     		}
+    		std::cout << buffer << std::endl;
+    		std::cout << encode(buffer, len) << std::endl;
+    		std::cout << decode(encode(buffer, len), len) << std::endl;
+    		// return false;
+    		std::cout << "-----------------" << std::endl;
         	outfile.write(encode(buffer, len), infile.gcount());
         	outfile.close();
         	fprintf(file, "%s\n", partname);
 
         } 
+        // return true;
         //gcount возвращает количество байт, считанных в последний раз
         //ее и используем для проверки, что что-то считалось, а заодно устанавливаем количество записываемых байт
     }

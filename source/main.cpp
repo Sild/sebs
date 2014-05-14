@@ -21,9 +21,11 @@ int main(int argc, char *argv[])
     string opath = app_path.string() + out;
     string cpath = app_path.string() + clone;
     
-    segmentate( ipath.c_str(), opath.c_str() );
+    if( segmentate( ipath.c_str(), opath.c_str() ) ) {
+    	merge( opath.c_str(), cpath.c_str() );	
+    }
 
-    merge( opath.c_str(), cpath.c_str() );
+    
     exit(1);
 }
 
