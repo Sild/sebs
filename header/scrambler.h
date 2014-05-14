@@ -3,6 +3,8 @@
 
 char * encode(char* block, int len);
 
-char * decode(char* block);
+char * encode2(char *block, int len);
+
+char * decode(char* block, int len);
 
 #endif

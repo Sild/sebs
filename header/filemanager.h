@@ -8,6 +8,8 @@
 using namespace std;
 boost::filesystem::path get_app_path();
 
-bool copy(string ifpath, string ofpath);
+bool segmentate(string ifpath, string ofpath); //разбивает входной файл, в выходном содержится список разбитых элементов
+
+bool merge(string ifpath, string ofpath); //принимает на вход файл со списком элементов
 
 #endif

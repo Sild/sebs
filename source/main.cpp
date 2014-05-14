@@ -16,10 +16,14 @@ int main(int argc, char *argv[])
 
     string out = "/output/acpy.out";
     string in = "/input/a.out";
-    string close = "/close/a.out"
+    string clone = "/clone/a.out";
+    string ipath = app_path.string() + in;
+    string opath = app_path.string() + out;
+    string cpath = app_path.string() + clone;
     
-    copy((app_path.string() + in).c_str(), (app_path.string() + out).c_str());
+    segmentate( ipath.c_str(), opath.c_str() );
 
+    merge( opath.c_str(), cpath.c_str() );
     exit(1);
 }
 

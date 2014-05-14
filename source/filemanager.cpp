@@ -7,9 +7,34 @@ boost::filesystem::path get_app_path() {
 	return boost::filesystem::current_path();
 }
 
-bool copy(string ifpath, string ofpath) {
-	std::string test = "teststr";
-	std::cout << md5(test) << std::endl;
+bool merge(string ifpath, string ofpath) {
+	char *buffer;
+	int len = 2048;
+	buffer = new char[len];
+	int maxstrlen = 100;
+	std::ifstream segment_list(ifpath.c_str());
+	std::string segment_name;
+
+	ofstream ofile( ofpath, ios::out | ios::binary );
+
+	while(segment_list) {
+		std::getline(segment_list, segment_name);
+		ifstream ifile(segment_name.c_str(), ios::in | ios::binary);
+		do {
+
+			ifile.read(buffer, len);
+			if(ifile.gcount()) {
+				ofile.write( decode(buffer, len), ifile.gcount());
+			}
+		} while (ifile.gcount());
+		ifile.close();
+	}
+	delete[] buffer;
+	ofile.close();
+	return true;
+}
+
+bool segmentate(string ifpath, string ofpath) {
 	char * buffer;
     int len = 2048; //Выбираем размер буфера, какой нравится
  
@@ -33,8 +58,7 @@ bool copy(string ifpath, string ofpath) {
         		cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
         		return false;
     		}
-
-        	outfile.write(buffer/*encode(buffer, len)*/, infile.gcount());
+        	outfile.write(encode(buffer, len), infile.gcount());
         	outfile.close();
         	fprintf(file, "%s\n", partname);
 
@@ -42,8 +66,10 @@ bool copy(string ifpath, string ofpath) {
         //gcount возвращает количество байт, считанных в последний раз
         //ее и используем для проверки, что что-то считалось, а заодно устанавливаем количество записываемых байт
     }
- 	fclose(file);
+
+	fclose(file); 
     infile.close();
+ 	
     delete[] buffer;
     return true;
 }
