@@ -1,23 +1,34 @@
-#include <boost/filesystem/operations.hpp>
-
-#include <boost/filesystem/path.hpp>
-
 #include <iostream>
+#include <stdio.h>
+#include <unistd.h>
 
-namespace fs = boost::filesystem;
+#include <fstream>
+#include <string>
+#include "../header/filemanager.h"
 
 
-int main(int argc,char** argv)
+using namespace std;
+
+
+int main(int argc, char *argv[])
 {
-    fs::path full_path( fs::initial_path<fs::path>() );
+    boost::filesystem::path app_path = get_app_path();
 
-    full_path = fs::system_complete( fs::path( argv[0] ) );
+    string out = "/output/acpy.out";
+    string in = "/input/a.out";
+    string clone = "/clone/a.out";
+    string ipath = app_path.string() + in;
+    string opath = app_path.string() + out;
+    string cpath = app_path.string() + clone;
+    
+    if( segmentate( ipath.c_str(), opath.c_str() ) ) {
+    	merge( opath.c_str(), cpath.c_str() );	
+    }
 
-    std::cout << full_path << std::endl;
-
-    //Without file name
-    std::cout << full_path.stem() << std::endl;
-    //std::cout << fs::basename(full_path) << std::endl;
-
-    return 0;
+    
+    exit(1);
 }
+
+
+
+
