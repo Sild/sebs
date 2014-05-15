@@ -25,10 +25,7 @@ bool merge(string ifpath, string ofpath) {
 
 			ifile.read(buffer, len);
 			if(ifile.gcount()) {
-    		std::cout << decode(buffer, len) << std::endl;
-    		std::cout << "-----------------" << std::endl;
-
-				ofile.write( decode(buffer, len), ifile.gcount());
+				ofile.write( decode(buffer, ifile.gcount()), ifile.gcount());
 			}
 		} while (ifile.gcount());
 		ifile.close();
@@ -62,19 +59,7 @@ bool segmentate(string ifpath, string ofpath) {
         		cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
         		return false;
     		}
-    		std::cout << buffer << std::endl;
-    		// std::cout << encode(buffer, len) << std::endl;
-    		// std::cout << decode(encode(buffer, len), len) << std::endl;
-    		// return false;
-    		std::cout << "-----------------" << std::endl;
-    		if(buffer == decode(encode(buffer, len), len)) {
-				std::cout << "EHO" << std::endl;
-			}
-
-			if(buffer == buffer) {
-				std::cout << "EHO" << std::endl;
-			}
-        	outfile.write(encode(buffer, len), infile.gcount());
+        	outfile.write(encode(buffer, infile.gcount()), infile.gcount());
         	outfile.close();
         	fprintf(file, "%s\n", partname);
 
