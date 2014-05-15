@@ -7,11 +7,9 @@ char * encode(char *block, int len) {
 	enc_block = new char[len];
 	int i = 0;
 	while(*block) {
-		// std::cout << *block << " " << ~(int)*block << " | ";
-		enc_block[i++] = (~(int)*block);
+		enc_block[i++] = *block + 1;
 		block++;
 	}
-	// std::cout << i << std::endl;
 	return enc_block;
 
 }
@@ -21,14 +19,10 @@ char * decode(char *block, int len) {
 	dec_block = new char[len];
 	int i = 0;
 	while(*block) {
-		// std::cout << *block << " " << ~(int)*block << " | ";
-		dec_block[i++] = (char)(~*block);
+		dec_block[i++] = *block - 1;//(char)(~(int)*block);
 		block++;
 	}
-	
-	// std::cout << i << std::endl;
 	return dec_block;
-
 }
 
 char * encode2(char *block, int len) {

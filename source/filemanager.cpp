@@ -20,17 +20,12 @@ bool merge(string ifpath, string ofpath) {
 
 	while(segment_list) {
 		std::getline(segment_list, segment_name);
-		std::cout << segment_name << std::endl;
 		ifstream ifile(segment_name.c_str(), ios::in | ios::binary);
 		do {
 
 			ifile.read(buffer, len);
 			if(ifile.gcount()) {
-
-				// std::cout << buffer << std::endl;
     		std::cout << decode(buffer, len) << std::endl;
-    		// std::cout << decode(encode(buffer, len), len) << std::endl;
-    		// return false;
     		std::cout << "-----------------" << std::endl;
 
 				ofile.write( decode(buffer, len), ifile.gcount());
@@ -68,10 +63,17 @@ bool segmentate(string ifpath, string ofpath) {
         		return false;
     		}
     		std::cout << buffer << std::endl;
-    		std::cout << encode(buffer, len) << std::endl;
-    		std::cout << decode(encode(buffer, len), len) << std::endl;
+    		// std::cout << encode(buffer, len) << std::endl;
+    		// std::cout << decode(encode(buffer, len), len) << std::endl;
     		// return false;
     		std::cout << "-----------------" << std::endl;
+    		if(buffer == decode(encode(buffer, len), len)) {
+				std::cout << "EHO" << std::endl;
+			}
+
+			if(buffer == buffer) {
+				std::cout << "EHO" << std::endl;
+			}
         	outfile.write(encode(buffer, len), infile.gcount());
         	outfile.close();
         	fprintf(file, "%s\n", partname);
