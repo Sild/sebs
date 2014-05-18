@@ -5,11 +5,17 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-using namespace std;
-boost::filesystem::path get_app_path();
+#include "scrambler.h"
+#include "md5.h"
 
-bool segmentate(string ifpath, string ofpath); //разбивает входной файл, в выходном содержится список разбитых элементов
 
-bool merge(string ifpath, string ofpath); //принимает на вход файл со списком элементов
+class Filemanager {
+public:
+	Filemanager();
+	bool segmentate(std::string ifile, std::string ofile); // of will contain meta-data
+	bool merge(std::string ifile, std::string ofile);//ifile - file which contain meta-data
 
+private:
+	Scrambler *scrambler;
+};
 #endif

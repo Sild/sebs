@@ -1,31 +1,27 @@
-
 #include "../header/filemanager.h"
-#include "../header/scrambler.h"
-#include "../header/md5.h"
 
-boost::filesystem::path get_app_path() {
-	return boost::filesystem::current_path();
+Filemanager::Filemanager() {
+	this->scrambler = new Scrambler("secret_key");
 }
 
-bool merge(string ifpath, string ofpath) {
-	std::cout << "++++++++++++++" << std::endl;
+bool Filemanager::merge(std::string ifpath, std::string ofpath) {
 	char *buffer;
-	int len = 20480;
+	int len = 2048;
 	buffer = new char[len];
 	int maxstrlen = 100;
 	std::ifstream segment_list(ifpath.c_str());
 	std::string segment_name;
 
-	ofstream ofile( ofpath, ios::out | ios::binary );
+	std::ofstream ofile( ofpath, std::ios::out | std::ios::binary );
 
 	while(segment_list) {
 		std::getline(segment_list, segment_name);
-		ifstream ifile(segment_name.c_str(), ios::in | ios::binary);
+		std::ifstream ifile(segment_name.c_str(), std::ios::binary);
 		do {
 
 			ifile.read(buffer, len);
 			if(ifile.gcount()) {
-				ofile.write( decode(buffer, ifile.gcount()), ifile.gcount());
+				ofile.write( this->scrambler->decode(buffer), ifile.gcount());
 			}
 		} while (ifile.gcount());
 		ifile.close();
@@ -35,14 +31,14 @@ bool merge(string ifpath, string ofpath) {
 	return true;
 }
 
-bool segmentate(string ifpath, string ofpath) {
+bool Filemanager::segmentate(std::string ifpath, std::string ofpath) {
 	char * buffer;
-    int len = 20480; //Выбираем размер буфера, какой нравится
+    int len = 2048; //ширина блока
  
-    ifstream infile(ifpath.c_str(), ios::in | ios::binary);
+    std::ifstream infile(ifpath.c_str(), std::ios::in | std::ios::binary);
 
-    if(!infile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
-        cout << "cannot open input files\n";
+    if(!infile){ //отсутствие прав постучалось в двери
+        std::cout << "cannot open input files\n";
         return false;
     }
 
@@ -53,20 +49,23 @@ bool segmentate(string ifpath, string ofpath) {
     while (!infile.eof()){
         infile.read(buffer, len);
         if(infile.gcount()) {
-        	const char *partname = ("./output/" + md5(ofpath) + to_string(i++)).c_str();
-        	ofstream outfile( partname, ios::out | ios::binary);
+        	const char *partname = ("./output/" + md5(ofpath) + std::to_string(i++)).c_str();
+        	std::cout <<  partname << std::endl;
+        	std::ofstream outfile( partname, std::ios::binary);
+        	std::cout << partname << std::endl;
         	if(!outfile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
-        		cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
+        		std::cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
         		return false;
     		}
-        	outfile.write(encode(buffer, infile.gcount()), infile.gcount());
+    		// std::cout << buffer << std::endl;
+    		std::cout << partname << std::endl;
+        	outfile.write(this->scrambler->encode(buffer), infile.gcount());
+        	std::cout << partname << std::endl;
         	outfile.close();
         	fprintf(file, "%s\n", partname);
+        	return true;
 
         } 
-        // return true;
-        //gcount возвращает количество байт, считанных в последний раз
-        //ее и используем для проверки, что что-то считалось, а заодно устанавливаем количество записываемых байт
     }
 
 	fclose(file); 
