@@ -6,12 +6,12 @@ Filemanager::Filemanager() {
 
 bool Filemanager::merge(std::string ifpath, std::string ofpath) {
 	char *buffer;
-	int len = 2048;
+	int len = 20480;
 	buffer = new char[len];
 	int maxstrlen = 100;
 	std::ifstream segment_list(ifpath.c_str());
 	std::string segment_name;
-
+	std::string dec_buf;
 	std::ofstream ofile( ofpath, std::ios::out | std::ios::binary );
 
 	while(segment_list) {
@@ -21,8 +21,10 @@ bool Filemanager::merge(std::string ifpath, std::string ofpath) {
 
 			ifile.read(buffer, len);
 			if(ifile.gcount()) {
-				ofile.write( this->scrambler->decode(buffer), ifile.gcount());
+				    		std::cout << this->scrambler->decode(buffer).c_str() << std::endl << "-----" << std::endl;
+				ofile.write( this->scrambler->decode(buffer).c_str(), ifile.gcount());
 			}
+
 		} while (ifile.gcount());
 		ifile.close();
 	}
@@ -33,9 +35,10 @@ bool Filemanager::merge(std::string ifpath, std::string ofpath) {
 
 bool Filemanager::segmentate(std::string ifpath, std::string ofpath) {
 	char * buffer;
-    int len = 2048; //ширина блока
+    int len = 20480; //ширина блока
  
     std::ifstream infile(ifpath.c_str(), std::ios::in | std::ios::binary);
+    std::ofstream target("./output/a.out", std::ios::out | std::ios::binary);
 
     if(!infile){ //отсутствие прав постучалось в двери
         std::cout << "cannot open input files\n";
@@ -46,28 +49,37 @@ bool Filemanager::segmentate(std::string ifpath, std::string ofpath) {
     
     buffer = new char[len];
     int i = 0;
+
+    std::string partname;
+    std::string enc_buf;
+    std::string meta_line;
     while (!infile.eof()){
         infile.read(buffer, len);
         if(infile.gcount()) {
-        	const char *partname = ("./output/" + md5(ofpath) + std::to_string(i++)).c_str();
-        	std::cout <<  partname << std::endl;
-        	std::ofstream outfile( partname, std::ios::binary);
-        	std::cout << partname << std::endl;
+        	partname = "./output/" + md5(ofpath) + std::to_string(i++);
+        	std::ofstream outfile( partname.c_str(), std::ios::binary);
+
         	if(!outfile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
         		std::cout << "cannot open output files named \"" << ofpath << i-1 << "\" \n";
         		return false;
     		}
-    		// std::cout << buffer << std::endl;
-    		std::cout << partname << std::endl;
-        	outfile.write(this->scrambler->encode(buffer), infile.gcount());
-        	std::cout << partname << std::endl;
+    		std::cout << buffer << std::endl << "----------" << std::endl << this->scrambler->encode(buffer) << std::endl << "-----" << std::endl;
+    		
+    		std::cout << this->scrambler->decode(this->scrambler->encode(buffer).c_str()) << std::endl;
+        	std::cout << "+++++++++++" << std::endl;
+        	outfile.write(this->scrambler->encode(buffer).c_str(), infile.gcount());
+
+        	
+
+        	target.write( this->scrambler->decode(this->scrambler->encode(buffer).c_str()).c_str(), infile.gcount());
+
         	outfile.close();
-        	fprintf(file, "%s\n", partname);
-        	return true;
+			fprintf(file, "%s\n", partname.c_str());
+        	// return true;
 
         } 
     }
-
+    target.close();
 	fclose(file); 
     infile.close();
  	

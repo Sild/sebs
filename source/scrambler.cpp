@@ -1,4 +1,5 @@
 #include "../header/scrambler.h"
+http://www.cryptopp.com/wiki/Advanced_Encryption_Standard
 
 Scrambler::Scrambler(std::string private_key) {
 	this->set_private_key_length(private_key.length());
@@ -6,7 +7,7 @@ Scrambler::Scrambler(std::string private_key) {
 
 }
 
-const char *Scrambler::encode(const char *bite_stream) {
+std::string Scrambler::encode(const char *bite_stream) {
 
     byte iv[ CryptoPP::AES::BLOCKSIZE ];
     memset( iv, 0x00, CryptoPP::AES::BLOCKSIZE );
@@ -18,14 +19,13 @@ const char *Scrambler::encode(const char *bite_stream) {
     CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption( aesEncryption, iv );
 
     CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink( cipher_data ) );
-    stfEncryptor.Put( reinterpret_cast<const unsigned char*>( clean_data.c_str() ), clean_data.length() );
+    stfEncryptor.Put( reinterpret_cast<const unsigned char*>( clean_data.c_str() ), clean_data.length() + 1);
     stfEncryptor.MessageEnd();
-    
-	return cipher_data.c_str();
+	return cipher_data;
 
 }
 
-const char *Scrambler::decode(const char *bite_stream) {
+std::string Scrambler::decode(const char *bite_stream) {
 
     byte iv[ CryptoPP::AES::BLOCKSIZE ];
     memset( iv, 0x00, CryptoPP::AES::BLOCKSIZE );
@@ -40,7 +40,7 @@ const char *Scrambler::decode(const char *bite_stream) {
     stfDecryptor.Put( reinterpret_cast<const unsigned char*>( cipher_data.c_str() ), cipher_data.size() );
     stfDecryptor.MessageEnd();
 
-    return clean_data.c_str();
+    return clean_data;
 }
 
 void Scrambler::set_private_key( std::string value ) {
@@ -56,8 +56,6 @@ void Scrambler::set_private_key( std::string value ) {
 
 void Scrambler::set_private_key_length( const int &value ) {
 	int need_to_key_length = 8 - value % 8;
-	std::cout << need_to_key_length;
-
 	if( need_to_key_length == 0) {
 		this->private_key_length = value;
 	} else {
