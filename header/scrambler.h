@@ -10,14 +10,16 @@
 class Scrambler {
 public:
 	Scrambler(std::string private_key);
-	std::string encode(const char *bite_stream);
-	std::string decode(const char *bite_stream);
+	char *encode(const char *bite_stream, const int length);
+	char *decode(const char *bite_stream, const int length);
 
 private:
 	void set_private_key(std::string value);
 	void set_private_key_length(const int &value);
+	int sz;
 	byte *private_key;
 	int private_key_length;
+	byte *iv;
 };
 
 #endif

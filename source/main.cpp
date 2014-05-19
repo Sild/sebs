@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
     string clone = "./clone/a.out";
     Filemanager *filemanager = new Filemanager();
     if( filemanager->segmentate( ifile.c_str(), ofile.c_str() ) ) {
-    	// std::cout << "decodestrt" <<ifile std::endl;
-    	// filemanager->merge( ofile.c_str(), clone.c_str() );	
+    	filemanager->merge( ofile.c_str(), clone.c_str() );	
     }
     exit(1);
 }

@@ -1,46 +1,33 @@
 #include "../header/scrambler.h"
-http://www.cryptopp.com/wiki/Advanced_Encryption_Standard
+//http://www.cryptopp.com/wiki/Advanced_Encryption_Standard
 
 Scrambler::Scrambler(std::string private_key) {
 	this->set_private_key_length(private_key.length());
 	this->set_private_key(private_key);
+	this->iv = new byte[ CryptoPP::AES::BLOCKSIZE ];
+	memset( this->iv, 0x00, CryptoPP::AES::BLOCKSIZE );
 
 }
 
-std::string Scrambler::encode(const char *bite_stream) {
+char *Scrambler::encode(const char *bite_stream, const int length) {
 
-    byte iv[ CryptoPP::AES::BLOCKSIZE ];
-    memset( iv, 0x00, CryptoPP::AES::BLOCKSIZE );
+    char *cipher_bite_stream = new char[length];
 
-    std::string clean_data(bite_stream);
-    std::string cipher_data;
+	CryptoPP::CFB_Mode<CryptoPP::AES>::Encryption cfbEncryption(this->private_key,this->private_key_length, this->iv);
+	cfbEncryption.ProcessData((byte*)cipher_bite_stream, (byte*)bite_stream, length);
 
-    CryptoPP::AES::Encryption aesEncryption(this->private_key, this->private_key_length);
-    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption( aesEncryption, iv );
-
-    CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink( cipher_data ) );
-    stfEncryptor.Put( reinterpret_cast<const unsigned char*>( clean_data.c_str() ), clean_data.length() + 1);
-    stfEncryptor.MessageEnd();
-	return cipher_data;
+	return cipher_bite_stream;
 
 }
 
-std::string Scrambler::decode(const char *bite_stream) {
+char *Scrambler::decode(const char *cipher_bite_stream, const int length) {
 
-    byte iv[ CryptoPP::AES::BLOCKSIZE ];
-    memset( iv, 0x00, CryptoPP::AES::BLOCKSIZE );
+    char *bite_stream = new char[length];
 
-    std::string cipher_data(bite_stream);
-    std::string clean_data;
+    CryptoPP::CFB_Mode<CryptoPP::AES >::Decryption cfbDecryption(this->private_key,this->private_key_length, this->iv);
+    cfbDecryption.ProcessData((byte*)bite_stream, (byte*)cipher_bite_stream, length);
 
-    CryptoPP::AES::Decryption aesDecryption(this->private_key, this->private_key_length);
-    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption( aesDecryption, iv );
-
-    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink( clean_data ) );
-    stfDecryptor.Put( reinterpret_cast<const unsigned char*>( cipher_data.c_str() ), cipher_data.size() );
-    stfDecryptor.MessageEnd();
-
-    return clean_data;
+    return bite_stream;
 }
 
 void Scrambler::set_private_key( std::string value ) {
