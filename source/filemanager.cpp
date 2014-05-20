@@ -52,9 +52,9 @@ bool Filemanager::segmentate(std::string ifpath, std::string ofpath) {
 
     std::string partname;
 
-    while (!infile.eof()){
-        infile.read(buffer, len);
-        if(infile.gcount()) {
+    while (!ifile.eof()){
+        ifile.read(buffer, size);
+        if(ifile.gcount()) {
 
         	partname = "./output/" + md5(ofpath) + std::to_string(i++);
         	std::ofstream ofile( partname.c_str(), std::ios::binary);
