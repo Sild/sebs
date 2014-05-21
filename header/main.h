@@ -4,5 +4,6 @@
 
 #include <fstream>
 #include <string>
-#include "../header/filemanager.h"
+#include "filemanager.h"
 #include "../lib/dtl/dtl.hpp"
+#include "diff_match_patch.h"

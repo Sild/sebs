@@ -12,17 +12,17 @@ int main(int argc, char *argv[])
     if( filemanager->segmentate( ifile.c_str(), ofile.c_str() ) ) {
     	filemanager->merge( ofile.c_str(), clone.c_str() );	
     }
-
+    char *omnomn = new char[1999999999];
 	string A("abc");
 	string B("abd");
 	dtl::Diff< char, string > d(A, B);
 // d.onOnlyEditDistance();
 	d.compose();             // construct an edit distance and LCS and SES
 	    d.printSES();
-	    d.getEditDistance();
-d.composeUnifiedHunks(); // construct a difference as Unified Format with SES.
+	    // d.getEditDistance();
+// d.composeUnifiedHunks(); // construct a difference as Unified Format with SES.
 std::cout << "lol" << std::endl;
-d.printUnifiedFormat();  // print a difference as Unified Format.
+// d.printUnifiedFormat();  // print a difference as Unified Format.
 
     exit(1);
 }
