@@ -25,5 +25,6 @@ private:
 	long get_str_count();
 	bool load();
 	std::vector<metarow> mdata;//meta-data
+	void show_metarow(const metarow* row);
 };
 

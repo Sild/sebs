@@ -28,10 +28,6 @@ bool Metaworker::write_metarow(metarow *row,const bool replace) {
 	}
 	int num = row->position;
 	delete row;
-	std::cout << this->mdata[row->position].clean_hash << std::endl;
-
-	
-	std::cout << strcount << std::endl;
     
     return true;
 }
@@ -75,31 +71,34 @@ bool Metaworker::load() {
 		mrow->cipher_hash = "";
 		std::getline(mdatastream, row);
 		strlength = row.length(); 
+		if(strlength == 0) {
+			break;
+		}
 		step = 0;
 		std::string tmpstart = "";
 		std::string tmpfinish = "";
+		mrow->position = linenum;
 		for(int i = 0; i < strlength; i++){
 			if ( row[i] == '\n') {
 				step++;
-			} else {
+			} else if ( row[i] == ' ') {
+				step++;
+			} else  {
 				switch(step) {
 					case 0:
-						mrow->position = linenum;
-						break;
-
-					case 1:
+						
 						mrow->clean_hash += row[i]; 
 						break;
 
-					case 2:
+					case 1:
 						mrow->cipher_hash += row[i];
 						break;
 
-					case 3:
+					case 2:
 						tmpstart += row[i];
 						break;
 
-					case 4:
+					case 3:
 						tmpfinish += row[i];
 						break;
 					default:
@@ -112,13 +111,22 @@ bool Metaworker::load() {
 		mrow->start = atoi(tmpstart.c_str());
 		mrow->finish = atoi(tmpfinish.c_str());
 
-
+		show_metarow(mrow);
 		this->mdata.push_back(*mrow);
 	}
 
 	mdatastream.close();
 
 	return true;
+}
+
+void Metaworker::show_metarow(const metarow* row) {
+	std::cout << "row number:  " << row->position << std::endl;
+	std::cout << "clean hash:  " << row->clean_hash << std::endl;
+	std::cout << "cipher hash: " << row->cipher_hash << std::endl;
+	std::cout << "start:       " << row->start << std::endl;
+	std::cout << "finish:      " << row->finish << std::endl;
+	std::cout << "-------------------" << std::endl;
 }
 
 

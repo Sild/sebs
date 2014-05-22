@@ -1,7 +1,7 @@
 SOURCE=source
 HEADER=header
 LIB=lib
-COMPILER=clang++
+COMPILER=g++
 sebs: main.o filemanager.o scrambler.o md5.o diff.o metaworker.o
 	$(COMPILER) -o sebs main.o filemanager.o scrambler.o md5.o diff.o metaworker.o -lboost_system -lboost_filesystem -lcryptopp -gwq
 
