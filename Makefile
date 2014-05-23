@@ -21,7 +21,7 @@ diff.o: $(HEADER)/diff.h $(SOURCE)/diff.cpp
 	$(COMPILER) -c $(SOURCE)/diff.cpp -g
 
 metaworker.o: $(HEADER)/metaworker.h $(SOURCE)/metaworker.cpp
-	$(COMPILER) -c $(SOURCE)/metaworker.cpp -g
+	$(COMPILER) -c $(SOURCE)/metaworker.cpp -std=c++11 -g
 
 clean:
 	rm ./*.o ./output/* ./clone/*

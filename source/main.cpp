@@ -14,8 +14,12 @@ int main(int argc, char *argv[])
     }
     Diff *diff = new Diff();
 
-    Metaworker *mworker = new Metaworker("./input/testcountstr");
-    mworker->write(1, "cleanhash", "cpherhash", 0, 200, false);
+    Metaworker *mworker = new Metaworker();
+    mworker->load("./input/testcountstr");
+    mworker->write("clean_hash3last", "cipher_hashlast", 0, 200);
+    // mworker->show();
+    mworker->save();
+    // delete mworker;
     exit(1);
 }
 
