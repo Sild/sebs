@@ -22,7 +22,7 @@ public:
 	metarow read(int position);
 	bool write(std::string clean_hash, std::string cipher_hash, int start, int finish, int position, const bool replace);
 	bool write(std::string clean_hash, std::string cipher_hash, int start, int finish);
-
+	long mfile_size() const;
 	void show() const;
 	bool save();
 

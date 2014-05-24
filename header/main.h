@@ -5,4 +5,3 @@
 #include <string>
 #include "filemanager.h"
 #include "diff.h"
-#include "metaworker.h"

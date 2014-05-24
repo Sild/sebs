@@ -7,15 +7,18 @@
 #include <sstream>
 #include "scrambler.h"
 #include "md5.h"
+#include "metaworker.h"
 
 
 class Filemanager {
 public:
 	Filemanager();
-	bool segmentate(std::string ifile, std::string ofile); // of will contain meta-data
-	bool merge(std::string ifile, std::string ofile);//ifile - file which contain meta-data
+	bool segmentate(std::string target_file_name); // of will contain meta-data
+	bool merge(std::string target_file_name);//ifile - file which contain meta-data
 
 private:
+	std::string input_dir;
+	std::string output_dir;
 	Scrambler *scrambler;
 };
 #endif

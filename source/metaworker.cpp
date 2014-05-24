@@ -34,8 +34,7 @@ void Metaworker::load(std::string mfpath) {
 
 
 metarow Metaworker::read(int position) {
-	metarow mock;
-	return mock;
+	return mdata[position];
 }
 
 
@@ -56,6 +55,10 @@ void Metaworker::show() const {
 	for(std::vector<metarow>::const_iterator itr = this->mdata.begin(); itr != mdata.end(); itr++) {
     		std::cout << (*itr).as_string() << std::endl;
 	}
+}
+
+long Metaworker::mfile_size() const{
+	return this->mdata.size();
 }
 	
 
