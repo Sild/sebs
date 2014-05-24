@@ -65,12 +65,11 @@ bool Filemanager::segmentate(std::string target_file_name) {
     while (!ifile.eof()){
         ifile.read(buffer, size);
         if(ifile.gcount()) {
-
             const char* enc_buffer = this->scrambler->encode(buffer, ifile.gcount());
             std::string str_buffer(buffer, ifile.gcount());
             std::string enc_str_buffer(enc_buffer, ifile.gcount());
             metarow = md5(str_buffer) + " " + md5(enc_str_buffer) + " " + std::to_string(read_start) + " " + std::to_string(read_start+ifile.gcount());   
-            chang_path = this->output_dir + "/" + md5(enc_buffer);
+            chang_path = this->output_dir + "/" + md5(enc_str_buffer);
             std::ofstream ofile( chang_path.c_str(), std::ios::binary);
             read_start += ifile.gcount();  
 
