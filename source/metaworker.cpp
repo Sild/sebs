@@ -22,8 +22,7 @@ Metaworker::Metaworker() {
 }
 
 Metaworker::~Metaworker() {
-	std::cout << "~Metaworker called" << std::endl;
-	delete this;
+    std::cout << "~Metaworker called" << std::endl;
 }
 
 void Metaworker::load(std::string mfpath) {
@@ -33,7 +32,7 @@ void Metaworker::load(std::string mfpath) {
 }
 
 
-metarow Metaworker::read(int position) {
+const metarow &Metaworker::read(int position) const {
 	return mdata[position];
 }
 

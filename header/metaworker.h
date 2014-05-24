@@ -19,7 +19,7 @@ public:
 	Metaworker();
 	~Metaworker();
 	void load(std::string mfpath);
-	metarow read(int position);
+    const metarow &read(int position) const ;
 	bool write(std::string clean_hash, std::string cipher_hash, int start, int finish, int position, const bool replace);
 	bool write(std::string clean_hash, std::string cipher_hash, int start, int finish);
 	long mfile_size() const;

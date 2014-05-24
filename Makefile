@@ -3,7 +3,7 @@ HEADER=header
 LIB=lib
 COMPILER=clang++
 sebs: main.o filemanager.o scrambler.o md5.o diff.o metaworker.o
-	$(COMPILER) -o sebs main.o filemanager.o scrambler.o md5.o diff.o metaworker.o -lboost_system -lboost_filesystem -lcryptopp -gwq
+	$(COMPILER) -o sebs main.o filemanager.o scrambler.o md5.o diff.o metaworker.o -lboost_system -lboost_filesystem -lcryptopp -g
 
 main.o: $(HEADER)/filemanager.h  $(HEADER)/main.h $(SOURCE)/main.cpp $(HEADER)/metaworker.h
 	$(COMPILER) -c $(SOURCE)/main.cpp -g
