@@ -6,11 +6,16 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     string target = "./input/a.out";
-    Filemanager *filemanager = new Filemanager();  
-    filemanager->update(target); 
-    // if( filemanager->segmentate(target) ) {
-    // 	filemanager->merge( target );	
-    // }
+    Filemanager *filemanager = new Filemanager(); 
+    if(!strncmp(argv[1], "seg", 3)) {
+         filemanager->segmentate(target);
+    }  else if (!strncmp(argv[1], "mer", 3)) {
+        filemanager->merge( target );   
+    } else if (!strncmp(argv[1], "upd", 3)) {
+        filemanager->update(target);     
+    }
+    
+    
     // Diff *diff = new Diff();
 
     // Metaworker *mworker = new Metaworker();

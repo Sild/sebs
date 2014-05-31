@@ -18,24 +18,30 @@ bool Filemanager::update(std::string file_path) {
     std::vector<std::pair<long, long> > diff = updater_result.second;
     // std::cout << "similar:" << std::endl;
     // updater->show_similar(similar_chunk);
-    std::cout << "diff bytes:" << std::endl;
+    // std::cout << "diff bytes:" << std::endl;
     updater->show_diff(diff);
     this->mworker = new Metaworker();
     this->mworker->load(file_path);
     std::vector<int> chunk_to_del;
-    std::cout << "diff blocks:" << std::endl;
-    for(int i = 0; i < mworker->mdata_size(); i++) {
-        if(similar_chunk.find(i) == similar_chunk.end()) {
-            std::cout << i << " ";
-            chunk_to_del.push_back(i);
-
-        }
-    }
-    std::cout << std::endl << "old mdata: " << std::endl;;
 
     this->mworker->show();
-    for(int i = 0; i < chunk_to_del.size(); i++) {
-        // std::cout << "num: " << i << std::endl;
+    
+    for(int i = 0; i < mworker->mdata_size(); i++) {
+        if(similar_chunk.find(i) == similar_chunk.end()) {
+            // std::cout << i << " ";
+            chunk_to_del.push_back(i);
+
+        } else {
+            mworker->mdata[i].start += ( *(similar_chunk.find(i))).second - 1;
+            mworker->mdata[i].finish += ( *(similar_chunk.find(i))).second - 1;
+        }
+    }
+
+    // std::cout << std::endl << "old mdata: " << std::endl;;
+
+   
+    for(int i = chunk_to_del.size() - 1;i >= 0; i--) {
+        // std::cout << "num: " << i << " chunk:" << chunk_to_del[i] << std::endl;
         this->rm_file(this->mworker->get(chunk_to_del[i]).cipher_hash);
         this->mworker->remove(chunk_to_del[i]);
     }
@@ -44,8 +50,9 @@ bool Filemanager::update(std::string file_path) {
         this->segmentate(file_path, diff[i].first, diff[i].second);
     }
 
-std::cout << std::endl << "new mdata: " << std::endl;;
-    this->mworker->show();
+std::cout << std::endl << "new mdata: " << std::endl;
+this->mworker->sort();
+    this->mworker->save();
 
 
 
@@ -74,7 +81,7 @@ bool Filemanager::segmentate(std::string file_path, long begin, long end) {
         if(lost >= this->buffer_size) {
             readed = this->buffer_size;
         } else {
-            readed = lost;
+            readed = lost + 1;
         }
         pread(ifile, buffer, readed, start_read_byte);
         const char* enc_buffer = this->scrambler->encode(buffer, readed);
@@ -88,6 +95,7 @@ bool Filemanager::segmentate(std::string file_path, long begin, long end) {
         std::ofstream ofile( chang_path.c_str(), std::ios::binary);
         start_read_byte += readed; 
         lost = end - start_read_byte;
+        // std::cout << lost << std::endl;
         if(!ofile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
             std::cout << "cannot open output files named \"" << md5(enc_str_buffer) << "\" \n";
             return false;
@@ -112,8 +120,8 @@ bool Filemanager::merge(std::string file_path) {
 
     mworker->load(file_path);
 	std::string segment_file_name;
-
-	std::ofstream ofile( file_path.c_str(), std::ios::out | std::ios::binary );
+    std::string ofile_path = "./clone/a.out";
+	std::ofstream ofile( ofile_path.c_str(), std::ios::out | std::ios::binary );
 
     for(int i = 0; i < mworker->mdata_size(); i++) {
         std::ifstream ifile( (this->output_dir + mworker->get(i).cipher_hash ), std::ios::binary);

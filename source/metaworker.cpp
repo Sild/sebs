@@ -42,7 +42,14 @@ bool Metaworker::remove(int position) {
 	return true;
 }
 
+bool Metaworker::sort() {
+	std::sort(this->mdata.begin(),this->mdata.end(), this->sort_func);
+	return true;
+}
 
+bool Metaworker::sort_func(metarow a, metarow b) {
+	return (a.start < b.start);
+}
 
 bool Metaworker::set(std::string clean_hash, std::string cipher_hash, int start, int finish, int position, const bool replace) {
 	metarow *row = this->generate_metarow(position, clean_hash, cipher_hash, start, finish);

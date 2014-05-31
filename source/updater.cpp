@@ -67,9 +67,9 @@ std::pair<std::map<int, int>, std::vector<std::pair<long, long> > >Updater::get_
     }
 
     if(lost_size != 0) {
-            diff.push_back(std::pair<long, long>(position, new_file_size - 1));
+            diff.push_back(std::pair<long, long>(prev_position - 1, new_file_size - 1));
     }
-    
+
     delete[] buf;
     close(fd);
     std::pair<std::map<int, int>, std::vector<std::pair<long, long> > > result(similar_chunk, diff);

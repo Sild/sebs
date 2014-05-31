@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
+#include <algorithm>
 #include "md5.h"
 struct metarow {
 	long position;
@@ -30,11 +31,12 @@ public:
 	long mdata_size() const;
 	void show() const;
 	bool save();
-
+	std::vector<metarow> mdata;//meta-data
+	bool sort();
 private:
 	std::string mfpath;
 	std::string output_dir;
-	std::vector<metarow> mdata;//meta-data
+	static bool sort_func(metarow a, metarow b);
 	bool get_content_from_metafile();
 	metarow *generate_metarow(int position, std::string clean_hash, std::string cipher_hash, int start, int finish);
 	bool write_metarow(metarow *row, const bool replace);
