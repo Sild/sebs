@@ -2,75 +2,192 @@
 
 Filemanager::Filemanager() {
 	this->scrambler = new Scrambler("secret_key");
+    this->output_dir = "./output/";
+    this->buffer_size = 2048;
 }
 
-bool Filemanager::merge(std::string ifpath, std::string ofpath) {
-	char *buffer;
-	int size = 2048;
-	buffer = new char[size];
-	std::ifstream meta_file(ifpath.c_str());
+Filemanager::~Filemanager() {
 
-	std::string segment_file_name;
-
-	std::ofstream ofile( ofpath, std::ios::out | std::ios::binary );
-
-	while(meta_file) {
-
-		std::getline(meta_file, segment_file_name);
-		std::ifstream ifile(segment_file_name.c_str(), std::ios::binary);
-		do {
-
-			ifile.read(buffer, size);
-			if(ifile.gcount()) {	
-				ofile.write( this->scrambler->decode(buffer, ifile.gcount()), ifile.gcount());
-			}
-
-		} while (ifile.gcount());
-		ifile.close();
-	}
-	delete[] buffer;
-	ofile.close();
-	return true;
 }
 
-bool Filemanager::segmentate(std::string ifpath, std::string ofpath) {
 
-	char *buffer;
-    int size = 2048; 
+bool Filemanager::update(std::string file_path) {
+    Updater *updater = new Updater();
+    std::pair<std::map<int, int>, std::vector<std::pair<long, long> > > updater_result = updater->get_similar(file_path);
+    std::map<int, int> similar_chunk = updater_result.first;
+    std::vector<std::pair<long, long> > diff = updater_result.second;
+    // std::cout << "similar:" << std::endl;
+    // updater->show_similar(similar_chunk);
+    // std::cout << "diff bytes:" << std::endl;
+    updater->show_diff(diff);
+    this->mworker = new Metaworker();
+    this->mworker->load(file_path);
+    std::vector<int> chunk_to_del;
 
-    std::ifstream ifile(ifpath.c_str(), std::ios::in | std::ios::binary);
+    this->mworker->show();
+    
+    for(int i = 0; i < mworker->mdata_size(); i++) {
+        if(similar_chunk.find(i) == similar_chunk.end()) {
+            // std::cout << i << " ";
+            chunk_to_del.push_back(i);
+
+        } else {
+            mworker->mdata[i].start += ( *(similar_chunk.find(i))).second - 1;
+            mworker->mdata[i].finish += ( *(similar_chunk.find(i))).second - 1;
+        }
+    }
+
+    // std::cout << std::endl << "old mdata: " << std::endl;;
+
+   
+    for(int i = chunk_to_del.size() - 1;i >= 0; i--) {
+        // std::cout << "num: " << i << " chunk:" << chunk_to_del[i] << std::endl;
+        this->rm_file(this->mworker->get(chunk_to_del[i]).cipher_hash);
+        this->mworker->remove(chunk_to_del[i]);
+    }
+
+    for(int i = 0; i < diff.size(); i++) {
+        this->segmentate(file_path, diff[i].first, diff[i].second);
+    }
+
+std::cout << std::endl << "new mdata: " << std::endl;
+this->mworker->sort();
+    this->mworker->save();
+
+
+
+    // this->mworker->save();
+    return true;
+
+}
+
+
+bool Filemanager::segmentate(std::string file_path, long begin, long end) {
+    char *buffer = new char[this->buffer_size];
+    int start_read_byte = begin;
+    std::string chang_path;
+    int readed;
+    int ifile = open(file_path.c_str(), 0);
 
     if(!ifile){ //отсутствие прав постучалось в двери
         std::cout << "cannot open input files\n";
         return false;
     }
 
- 	FILE *meta_file = fopen(ofpath.c_str(), "w");
-    
-    buffer = new char[size];
-    int i = 0;
+    int lost = end-start_read_byte;
 
-    std::string partname;
+    while ( lost > 0 ){
 
-    while (!infile.eof()){
-        infile.read(buffer, len);
-        if(infile.gcount()) {
+        if(lost >= this->buffer_size) {
+            readed = this->buffer_size;
+        } else {
+            readed = lost + 1;
+        }
+        pread(ifile, buffer, readed, start_read_byte);
+        const char* enc_buffer = this->scrambler->encode(buffer, readed);
+        std::string str_buffer(buffer, readed);
+        std::string enc_str_buffer(enc_buffer, readed);
 
-        	partname = "./output/" + md5(ofpath) + std::to_string(i++);
-        	std::ofstream ofile( partname.c_str(), std::ios::binary);
+        mworker->set( md5(str_buffer), md5(enc_str_buffer), start_read_byte, start_read_byte + readed - 1);
+        
+        chang_path = this->output_dir + md5(enc_str_buffer);
+        
+        std::ofstream ofile( chang_path.c_str(), std::ios::binary);
+        start_read_byte += readed; 
+        lost = end - start_read_byte;
+        // std::cout << lost << std::endl;
+        if(!ofile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
+            std::cout << "cannot open output files named \"" << md5(enc_str_buffer) << "\" \n";
+            return false;
+        }
+        ofile.write(enc_buffer, readed);
+        ofile.close();
+    }
+    close(ifile);
+    delete[] buffer;
+    return true;
+}
 
-        	if(!ofile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
-        		std::cout << "cannot open output files named \"" << partname << "\" \n";
-        		return false;
-    		}
+bool Filemanager::rm_file(std::string path) {
+    std::cout << "file" << path << "was deleted" << std::endl;
+    return true;
+}
 
-        	ofile.write(this->scrambler->encode(buffer, ifile.gcount()), ifile.gcount());
+bool Filemanager::merge(std::string file_path) {
+    std::cout << "start merge" << std::endl;
+	char *buffer = new char[this->buffer_size];
+    Metaworker *mworker = new Metaworker();
+
+    mworker->load(file_path);
+	std::string segment_file_name;
+    std::string ofile_path = "./clone/a.out";
+	std::ofstream ofile( ofile_path.c_str(), std::ios::out | std::ios::binary );
+
+    for(int i = 0; i < mworker->mdata_size(); i++) {
+        std::ifstream ifile( (this->output_dir + mworker->get(i).cipher_hash ), std::ios::binary);
+        do {
+
+            ifile.read(buffer, this->buffer_size);
+            if(ifile.gcount()) {    
+                ofile.write( this->scrambler->decode(buffer, ifile.gcount()), ifile.gcount());
+            }
+
+        } while (ifile.gcount());
+        ifile.close();
+
+    }
+
+	delete[] buffer;
+	ofile.close();
+	return true;
+}
+
+bool Filemanager::segmentate(std::string file_path) {       
+
+	char *buffer = new char[this->buffer_size];
+    int start_read_byte = 0;
+    Metaworker *mworker = new Metaworker();
+    mworker->load(file_path.c_str());
+
+    std::string chang_path;
+
+    std::ifstream ifile( file_path.c_str(), std::ios::in | std::ios::binary);
+
+    if(!ifile){ //отсутствие прав постучалось в двери
+        std::cout << "cannot open input files\n";
+        return false;
+    }
+
+
+
+    while (!ifile.eof()){
+
+        ifile.read(buffer, this->buffer_size);
+        if(ifile.gcount()) {
+
+            const char* enc_buffer = this->scrambler->encode(buffer, ifile.gcount());
+            std::string str_buffer(buffer, ifile.gcount());
+            std::string enc_str_buffer(enc_buffer, ifile.gcount());
+
+            mworker->set( md5(str_buffer), md5(enc_str_buffer), start_read_byte, start_read_byte + ifile.gcount() - 1);
+            
+            chang_path = this->output_dir + md5(enc_str_buffer);
+            
+            std::ofstream ofile( chang_path.c_str(), std::ios::binary);
+            
+            start_read_byte += ifile.gcount();  
+
+            if(!ofile){ //ошибку открытия файлов стоит отслеживать, всякое бывает
+                std::cout << "cannot open output files named \"" << md5(enc_str_buffer) << "\" \n";
+                return false;
+            }
+
+        	ofile.write(enc_buffer, ifile.gcount());
         	ofile.close();
-			fprintf(meta_file, "%s\n", partname.c_str());
 
         } 
     }
-	fclose(meta_file); 
+    mworker->save();
     ifile.close();
  	
     delete[] buffer;

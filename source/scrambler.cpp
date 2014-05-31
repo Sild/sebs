@@ -1,5 +1,4 @@
 #include "../header/scrambler.h"
-//http://www.cryptopp.com/wiki/Advanced_Encryption_Standard
 
 Scrambler::Scrambler(std::string private_key) {
 	this->set_private_key_length(private_key.length());
