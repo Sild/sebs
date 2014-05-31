@@ -19,31 +19,39 @@ void metarow::show() const{
 
 Metaworker::Metaworker() {
 	std::cout << "metaworker created" << std::endl;
+	this->output_dir = "./output/";
 }
 
 Metaworker::~Metaworker() {
     std::cout << "~Metaworker called" << std::endl;
 }
 
-void Metaworker::load(std::string mfpath) {
-	this->mfpath = mfpath;
+void Metaworker::load(std::string file_path) {
+	this->mfpath = this->output_dir + md5(file_path);
 	this->mdata.clear();
 	this->get_content_from_metafile();
 }
 
 
-const metarow &Metaworker::read(int position) const {
+const metarow &Metaworker::get(int position) const {
 	return mdata[position];
 }
 
+bool Metaworker::remove(int position) {
+	this->mdata.erase((this->mdata).begin() + position);
+	return true;
+}
 
 
-bool Metaworker::write(std::string clean_hash, std::string cipher_hash, int start, int finish, int position, const bool replace) {
+
+bool Metaworker::set(std::string clean_hash, std::string cipher_hash, int start, int finish, int position, const bool replace) {
 	metarow *row = this->generate_metarow(position, clean_hash, cipher_hash, start, finish);
+	std::cout << "zz" << std::endl;
 	return this->write_metarow(row, replace);
 }
 
-bool Metaworker::write(std::string clean_hash, std::string cipher_hash, int start, int finish) {
+bool Metaworker::set(std::string clean_hash, std::string cipher_hash, int start, int finish) {
+	
 	long position = this->mdata.size();
 	bool replace = false;
 	metarow *row = this->generate_metarow(position, clean_hash, cipher_hash, start, finish);
@@ -56,7 +64,7 @@ void Metaworker::show() const {
 	}
 }
 
-long Metaworker::mfile_size() const{
+long Metaworker::mdata_size() const{
 	return this->mdata.size();
 }
 	
@@ -131,7 +139,6 @@ metarow *Metaworker::generate_metarow(int position, std::string clean_hash, std:
 
 bool Metaworker::write_metarow(metarow *row,const bool replace) {
 	long strcount = this->get_str_count();
-	
 	if(replace) {
 		this->mdata[row->position] = *row;
 	} else {
@@ -150,12 +157,15 @@ long Metaworker::get_str_count() {
 	char *str = new char [1024];
     int i=0;
     std::ifstream base(this->mfpath.c_str());
-
-    while (!base.eof())
-    {
-        base.getline(str, 1024, '\n');
-        i++;
+    if(!base) {
+    	i = 1;
+    } else {
+    	while (!base.eof()) {
+        	base.getline(str, 1024, '\n');
+        	i++;
+    	}
     }
+   
     base.close();
     delete str;
     return i-1;//внезапно. почему-то всегда есть последний перевод строки в конце файла.

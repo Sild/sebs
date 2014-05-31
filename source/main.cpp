@@ -5,11 +5,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    string target = "a.out";
-    Filemanager *filemanager = new Filemanager();
-    if( filemanager->segmentate(target) ) {
-    	filemanager->merge( target );	
-    }
+    string target = "./input/a.out";
+    Filemanager *filemanager = new Filemanager();  
+    filemanager->update(target); 
+    // if( filemanager->segmentate(target) ) {
+    // 	filemanager->merge( target );	
+    // }
     // Diff *diff = new Diff();
 
     // Metaworker *mworker = new Metaworker();
